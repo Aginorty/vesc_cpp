@@ -7,13 +7,15 @@
 #include <thread>
 
 
-enum Options { START, STOP, QUIT };
+enum Options { START, STOP, GET_RPM, QUIT };
 
 Options resolveOptions(const std::string& input) {
   if (input == "s")
     return Options::START;
   if (input == "t")
     return Options::STOP;
+  if (input == "v")
+    return Options::GET_RPM;
   if (input == "q")
     return Options::QUIT;
 }
@@ -51,6 +53,11 @@ int main(int argc, char **argv) {
     case (Options::STOP):
       SPDLOG_DEBUG("Stopping motor ...");
       vesc->setDuty(0);
+      break;
+    case (Options::GET_RPM):
+      SPDLOG_DEBUG("printing values ...");
+      vesc->getVescValues();
+      vesc->printVescValues();
       break;
     case (Options::QUIT):
       SPDLOG_DEBUG("Quitting ...");
