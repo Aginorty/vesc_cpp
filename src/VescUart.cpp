@@ -1,3 +1,5 @@
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+
 #include "VescUart.h"
 #include "spdlog/spdlog.h"
 #include <chrono>
@@ -16,7 +18,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   // Messages <= 255 starts with "2", 2nd byte is length
   // Messages > 255 starts with "3" 2nd and 3rd byte is length combined with 1st
   // >>8 and then &0xFF
-
+  SPDLOG_DEBUG("receiving message");
   uint16_t counter = 0;
   uint16_t endMessage = 256;
   bool messageRead = false;
@@ -195,6 +197,7 @@ bool VescUart::getVescValues() {
 
   packSendPayload(command, 1);
   // delay(1); //needed, otherwise data is not read
+
 
   int lenPayload = receiveUartMessage(payload);
 

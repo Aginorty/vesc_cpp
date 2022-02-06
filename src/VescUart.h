@@ -65,7 +65,7 @@ public:
   /**
    * @brief      Help Function to print struct dataPackage over Serial for Debug
    */
-  static void printVescValues();
+  void printVescValues();
 
   void sendAlive();
 
@@ -100,7 +100,7 @@ private:
    * @param      payload  - The final payload ready to extract data from
    * @return     True if the process was a success
    */
-  static bool unpackPayload(uint8_t *message, int lenMes, uint8_t *payload);
+  bool unpackPayload(uint8_t *message, int lenMes, uint8_t *payload);
 
   /**
    * @brief      Extracts the data from the received payload
@@ -116,5 +116,5 @@ private:
    * @param      data  - Data array to print
    * @param      len   - Lenght of the array to print
    */
-  static void serialPrint(uint8_t *data, int len);
+  void serialPrint(uint8_t *data, int len);
 };
