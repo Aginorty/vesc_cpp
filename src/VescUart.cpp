@@ -54,6 +54,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
           break;
         }
       }
+      SPDLOG_DEBUG("Counter size = {}", counter);
 
       if (counter >= sizeof(messageReceived)) {
         break;

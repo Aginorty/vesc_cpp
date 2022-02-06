@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
         vesc->sendAlive();
       }
     }
+    spdlog::debug("Exiting alive thread");
   });
 
   while (!should_quit) {
