@@ -31,12 +31,13 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
       std::chrono::milliseconds(
           100); // Defining the timestamp for timeout (100ms before timeout)
 
-  while (std::chrono::high_resolution_clock::now() < timeout && !messageRead && !message_read_error) {
+  while (std::chrono::high_resolution_clock::now() < timeout && !messageRead &&
+         !message_read_error) {
 
-    while (true) {
-      char c ='1';
+    while (!message_read_error) {
+      unsigned char c = '1';
       boost::asio::read(serial, boost::asio::buffer(&c, 1));
-      messageReceived[counter++] =(uint8_t)c;
+      messageReceived[counter++] = c - 48;
 
       if (counter == 2) {
 
