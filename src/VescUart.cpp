@@ -146,8 +146,8 @@ int VescUart::packSendPayload(uint8_t *payload, int lenPay) {
   messageSend[count++] = 3;
   messageSend[count] = '\0';
 
-  SPDLOG_DEBUG("UART package send: ");
-  serialPrint(messageSend, count);
+  //SPDLOG_DEBUG("UART package send: ");
+  //serialPrint(messageSend, count);
 
   // Sending package
   boost::asio::write(serial, boost::asio::buffer(messageSend,count));
@@ -202,7 +202,7 @@ bool VescUart::getVescValues() {
   int lenPayload = receiveUartMessage(payload);
 
   if (lenPayload > 55) {
-    bool read = processReadPacket(payload); // returns true if sucessful
+    bool read = processReadPacket(payload); // returns true if successful
     return read;
   } else {
     return false;
