@@ -35,7 +35,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
     while (true) {
       char c ='1';
       boost::asio::read(serial, boost::asio::buffer(&c, 1));
-      messageReceived[counter++] =(uint8_t) std::stoi( &c);
+      messageReceived[counter++] =(uint8_t)std::atoi( &c);
 
       if (counter == 2) {
 
