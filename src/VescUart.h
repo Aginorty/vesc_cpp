@@ -65,7 +65,9 @@ public:
   /**
    * @brief      Help Function to print struct dataPackage over Serial for Debug
    */
-  void printVescValues();
+  static void printVescValues();
+
+  void sendAlive();
 
 private:
   /** Variable to hold the reference to the Serial object to use for UART */

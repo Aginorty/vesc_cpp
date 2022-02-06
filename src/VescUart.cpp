@@ -265,3 +265,12 @@ void VescUart::printVescValues() {
   SPDLOG_DEBUG("tachometer: {}", data.tachometer);
   SPDLOG_DEBUG("tachometerAbs: {}", data.tachometerAbs);
 }
+
+void VescUart::sendAlive() {
+  int32_t index = 0;
+  uint8_t payload[1];
+
+  payload[0] = COMM_ALIVE;
+
+  packSendPayload(payload, 5);
+}
