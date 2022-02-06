@@ -2,16 +2,15 @@
 
 #include "VescUart.h"
 #include "spdlog/spdlog.h"
-#include <chrono>
-#include <cstring>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
+#include <chrono>
+#include <cstring>
 
 VescUart::VescUart() : io(), serial(io, "/dev/ttyS0") {
   spdlog::set_level(spdlog::level::debug);
   serial.set_option(boost::asio::serial_port_base::baud_rate(115200));
 }
-
 
 int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
 
@@ -34,8 +33,9 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   while (std::chrono::high_resolution_clock::now() < timeout && !messageRead) {
 
     while (true) {
-      char c;
-      messageReceived[counter++] = boost::asio::read(serial, boost::asio::buffer(&c,1));
+      char c ='1';
+      boost::asio::read(serial, boost::asio::buffer(&c, 1));
+      messageReceived[counter++] =(uint8_t) std::stoi( &c);
 
       if (counter == 2) {
 
@@ -146,11 +146,11 @@ int VescUart::packSendPayload(uint8_t *payload, int lenPay) {
   messageSend[count++] = 3;
   messageSend[count] = '\0';
 
-  //SPDLOG_DEBUG("UART package send: ");
-  //serialPrint(messageSend, count);
+  // SPDLOG_DEBUG("UART package send: ");
+  // serialPrint(messageSend, count);
 
   // Sending package
-  boost::asio::write(serial, boost::asio::buffer(messageSend,count));
+  boost::asio::write(serial, boost::asio::buffer(messageSend, count));
   // Returns number of send bytes
   return count;
 }
@@ -197,7 +197,6 @@ bool VescUart::getVescValues() {
 
   packSendPayload(command, 1);
   // delay(1); //needed, otherwise data is not read
-
 
   int lenPayload = receiveUartMessage(payload);
 
