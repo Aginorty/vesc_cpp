@@ -21,6 +21,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   uint16_t counter = 0;
   uint16_t endMessage = 256;
   bool messageRead = false;
+  bool message_read_error = false;
   uint8_t messageReceived[256];
   uint16_t lenPayload = 0;
   std::chrono::high_resolution_clock::time_point time_now_ms =
@@ -30,12 +31,12 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
       std::chrono::milliseconds(
           100); // Defining the timestamp for timeout (100ms before timeout)
 
-  while (std::chrono::high_resolution_clock::now() < timeout && !messageRead) {
+  while (std::chrono::high_resolution_clock::now() < timeout && !messageRead && !message_read_error) {
 
     while (true) {
       char c ='1';
       boost::asio::read(serial, boost::asio::buffer(&c, 1));
-      messageReceived[counter++] =(uint8_t)std::atoi( &c);
+      messageReceived[counter++] =(uint8_t)c;
 
       if (counter == 2) {
 
@@ -53,6 +54,8 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
 
         default:
           SPDLOG_DEBUG("Unvalid start bit");
+          SPDLOG_DEBUG("first char received is : {}", c);
+          message_read_error = true;
           break;
         }
       }
