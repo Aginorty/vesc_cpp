@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     switch (resolveOptions(input_string)) {
     case (Options::START):
       SPDLOG_DEBUG("Starting motor ...");
-      vesc->setRPM(1000);
+      vesc->setDuty(0.1);
       break;
     case (Options::STOP):
       SPDLOG_DEBUG("Stopping motor ...");
@@ -70,5 +70,5 @@ int main(int argc, char **argv) {
     }
   }
   alive_thread_.join();
-
+  return 0;
 }
