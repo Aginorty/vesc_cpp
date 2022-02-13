@@ -56,6 +56,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   // Messages > 255 starts with "3" 2nd and 3rd byte is length combined with 1st
   // >>8 and then &0xFF
   SPDLOG_DEBUG("receiving message");
+  tcflush(fd, TCIFLUSH);
   uint16_t counter = 0;
   uint16_t endMessage = 256;
   bool messageRead = false;
