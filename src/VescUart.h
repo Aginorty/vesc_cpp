@@ -70,9 +70,10 @@ public:
   void sendAlive();
 
 private:
-  /** Variable to hold the reference to the Serial object to use for UART */
-  boost::asio::io_service io;
-  boost::asio::serial_port serial;
+//  /** Variable to hold the reference to the Serial object to use for UART */
+//  boost::asio::io_service io;
+//  boost::asio::serial_port serial;
+  int fd;
 
   /**
    * @brief      Packs the payload and sends it over Serial

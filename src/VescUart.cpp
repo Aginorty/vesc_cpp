@@ -7,9 +7,47 @@
 #include <chrono>
 #include <cstring>
 
-VescUart::VescUart() : io(), serial(io, "/dev/ttyS0") {
+VescUart::VescUart() {
   spdlog::set_level(spdlog::level::debug);
-  serial.set_option(boost::asio::serial_port_base::baud_rate(115200));
+//  char *portname = "/dev/ttyS0";
+  fd = open( "/dev/ttyS0", O_RDWR | O_NOCTTY);
+  struct termios toptions;
+  tcgetattr(fd, &toptions);
+
+  cfsetispeed(&toptions, B115200);
+  cfsetospeed(&toptions, B115200);
+  /* 8 bits, no parity, no stop bits */
+  toptions.c_cflag &= ~PARENB;
+  toptions.c_cflag &= ~CSTOPB;
+  toptions.c_cflag &= ~CSIZE;
+  toptions.c_cflag |= CS8;
+
+  toptions.c_cflag &= ~CRTSCTS;
+  /* enable receiver, ignore status lines */
+  toptions.c_cflag |= CREAD | CLOCAL;
+  /* disable input/output flow control, disable restart chars */
+  toptions.c_iflag &= ~(IXON | IXOFF | IXANY);
+  /* disable canonical input, disable echo,
+  disable visually erase chars,
+  disable terminal-generated signals */
+  toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+  /* disable output processing */
+  toptions.c_oflag &= ~OPOST;
+
+  /* wait for 12 characters to come in before read returns */
+  /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
+  /* CHARACTERS HAVE COME IN! */
+//  toptions.c_cc[VMIN] = 12;
+//  /* no minimum time to wait before read returns */
+//  toptions.c_cc[VTIME] = 0;
+
+  /* commit the options */
+  tcsetattr(fd, TCSANOW, &toptions);
+
+  /* Flush anything already in the serial buffer */
+  tcflush(fd, TCIFLUSH);
+//  /* read up to 128 bytes from the fd */
+//  int n = read(fd, buf, 128);
 }
 
 int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
@@ -35,9 +73,9 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
          !message_read_error) {
 
     while (!message_read_error) {
-      unsigned char c = '1';
-      boost::asio::read(serial, boost::asio::buffer(&c, 1));
-      messageReceived[counter++] = c - 48;
+      char c = '1';
+      read(fd, &c, 1);
+      messageReceived[counter++] = c;
 
       if (counter == 2) {
 
@@ -154,7 +192,7 @@ int VescUart::packSendPayload(uint8_t *payload, int lenPay) {
   // serialPrint(messageSend, count);
 
   // Sending package
-  boost::asio::write(serial, boost::asio::buffer(messageSend, count));
+  int n = write(fd, messageSend, count);
   // Returns number of send bytes
   return count;
 }
