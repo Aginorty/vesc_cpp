@@ -9,8 +9,8 @@
 
 VescUart::VescUart() {
   spdlog::set_level(spdlog::level::debug);
-//  char *portname = "/dev/ttyS0";
-  fd = open( "/dev/ttyS0", O_RDWR | O_NOCTTY);
+  //  char *portname = "/dev/ttyS0";
+  fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
   struct termios toptions;
   tcgetattr(fd, &toptions);
 
@@ -37,17 +37,17 @@ VescUart::VescUart() {
   /* wait for 12 characters to come in before read returns */
   /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
   /* CHARACTERS HAVE COME IN! */
-//  toptions.c_cc[VMIN] = 12;
-//  /* no minimum time to wait before read returns */
-//  toptions.c_cc[VTIME] = 0;
+  toptions.c_cc[VMIN] = 12;
+  //  /* no minimum time to wait before read returns */
+  toptions.c_cc[VTIME] = 10;
 
   /* commit the options */
   tcsetattr(fd, TCSANOW, &toptions);
 
   /* Flush anything already in the serial buffer */
   tcflush(fd, TCIFLUSH);
-//  /* read up to 128 bytes from the fd */
-//  int n = read(fd, buf, 128);
+  //  /* read up to 128 bytes from the fd */
+  //  int n = read(fd, buf, 128);
 }
 
 int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
@@ -61,6 +61,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   uint16_t endMessage = 256;
   bool messageRead = false;
   bool message_read_error = false;
+  bool first_read = true;
   uint8_t messageReceived[256];
   uint16_t lenPayload = 0;
   std::chrono::high_resolution_clock::time_point time_now_ms =
@@ -72,14 +73,17 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
 
   while (std::chrono::high_resolution_clock::now() < timeout && !messageRead &&
          !message_read_error) {
+    size_t received_bytes_total = 0;
+    size_t buffer_length = 100;
+    while (!message_read_error && (received_bytes_total < buffer_length)) {
+      uint8_t buffer[buffer_length];
+      size_t read_num = read(fd, messageReceived + received_bytes_total,
+                             buffer_length - received_bytes_total);
+      received_bytes_total += read_num;
+      //      messageReceived[counter++] = buffer;
 
-    while (!message_read_error) {
-      char c = '1';
-      read(fd, &c, 1);
-      messageReceived[counter++] = c;
-
-      if (counter == 2) {
-
+      if (first_read) {
+        first_read = false;
         switch (messageReceived[0]) {
         case 2:
           endMessage = messageReceived[1] +
@@ -94,7 +98,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
 
         default:
           SPDLOG_DEBUG("Unvalid start bit");
-          SPDLOG_DEBUG("first char received is : {}", c);
+          SPDLOG_DEBUG("first char received is : {}", buffer[0]);
           message_read_error = true;
           break;
         }
@@ -102,6 +106,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
       SPDLOG_DEBUG("Counter size = {}", counter);
 
       if (counter >= sizeof(messageReceived)) {
+        message_read_error = true;
         break;
       }
 
