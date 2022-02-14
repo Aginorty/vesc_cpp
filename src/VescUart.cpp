@@ -89,6 +89,7 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
           endMessage = messageReceived[1] +
                        5; // Payload size + 2 for sice + 3 for SRC and End.
           lenPayload = messageReceived[1];
+          SPDLOG_DEBUG("payload size = {}", lenPayload);
           break;
 
         case 3:
