@@ -79,6 +79,8 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
       uint8_t buffer[buffer_length];
       size_t read_num = read(fd, messageReceived + received_bytes_total,
                              buffer_length - received_bytes_total);
+      SPDLOG_DEBUG("current read size = {}", received_bytes_total);
+      SPDLOG_DEBUG("total read size = {}", read_num);
       received_bytes_total += read_num;
       //      messageReceived[counter++] = buffer;
 
