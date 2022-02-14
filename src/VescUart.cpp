@@ -70,11 +70,11 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
       time_now_ms +
       std::chrono::milliseconds(
           100); // Defining the timestamp for timeout (100ms before timeout)
-
+  size_t received_bytes_total = 0;
+  size_t buffer_length = 100;
   while (std::chrono::high_resolution_clock::now() < timeout && !messageRead &&
          !message_read_error) {
-    size_t received_bytes_total = 0;
-    size_t buffer_length = 100;
+
     while (!message_read_error && (received_bytes_total < buffer_length)) {
       uint8_t buffer[buffer_length];
       size_t read_num = read(fd, messageReceived + received_bytes_total,
