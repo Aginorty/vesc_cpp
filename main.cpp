@@ -34,12 +34,12 @@ int main(int argc, char **argv) {
     auto loop_start = std::chrono::high_resolution_clock::now();
     auto time_between_alive_msgs_s = std::chrono::milliseconds(500);
     while(!should_quit){
-      auto elapsed_time = std::chrono::high_resolution_clock::now() - loop_start;
-      if( elapsed_time < time_between_alive_msgs_s){
-        std::this_thread::sleep_for(time_between_alive_msgs_s-elapsed_time);
-      }else{
+      //auto elapsed_time = std::chrono::high_resolution_clock::now() - loop_start;
+      //if( elapsed_time < time_between_alive_msgs_s){
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      //}else{
         vesc->sendAlive();
-      }
+      //}
     }
     spdlog::debug("Exiting alive thread");
   });

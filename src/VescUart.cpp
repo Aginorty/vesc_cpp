@@ -37,9 +37,9 @@ VescUart::VescUart() {
   /* wait for 12 characters to come in before read returns */
   /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
   /* CHARACTERS HAVE COME IN! */
-  toptions.c_cc[VMIN] = 12;
+  //toptions.c_cc[VMIN] = 100;
   //  /* no minimum time to wait before read returns */
-  toptions.c_cc[VTIME] = 10;
+  //toptions.c_cc[VTIME] = 1;
 
   /* commit the options */
   tcsetattr(fd, TCSANOW, &toptions);
@@ -75,14 +75,12 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
   while (std::chrono::high_resolution_clock::now() < timeout && !messageRead &&
          !message_read_error) {
 
-    while (!message_read_error && (received_bytes_total < buffer_length)) {
+    while (!message_read_error && !messageRead) {
       uint8_t buffer[buffer_length];
       size_t read_num = read(fd, messageReceived + received_bytes_total,
                              buffer_length - received_bytes_total);
-      SPDLOG_DEBUG("current read size = {}", received_bytes_total);
-      SPDLOG_DEBUG("total read size = {}", read_num);
+      
       received_bytes_total += read_num;
-      //      messageReceived[counter++] = buffer;
 
       if (first_read) {
         first_read = false;
@@ -91,7 +89,6 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
           endMessage = messageReceived[1] +
                        5; // Payload size + 2 for sice + 3 for SRC and End.
           lenPayload = messageReceived[1];
-          SPDLOG_DEBUG("payload size = {}", lenPayload);
           break;
 
         case 3:
@@ -106,16 +103,16 @@ int VescUart::receiveUartMessage(uint8_t *payloadReceived) {
           break;
         }
       }
-      SPDLOG_DEBUG("Counter size = {}", counter);
-
-      if (counter >= sizeof(messageReceived)) {
+      
+      if (received_bytes_total >= endMessage + 1) {
         message_read_error = true;
         break;
       }
 
-      if (counter == endMessage && messageReceived[endMessage - 1] == 3) {
+      if (received_bytes_total == endMessage && messageReceived[endMessage - 1] == 3) {
         messageReceived[endMessage] = 0;
         messageRead = true;
+
         break; // Exit if end of message is reached, even if there is still more
                // data in the buffer.
       }
@@ -150,23 +147,24 @@ bool VescUart::unpackPayload(uint8_t *message, int lenMes, uint8_t *payload) {
   crcMessage &= 0xFF00;
   crcMessage += message[lenMes - 2];
 
-  SPDLOG_DEBUG("SRC received: ");
-  SPDLOG_DEBUG(crcMessage);
+  //SPDLOG_DEBUG("SRC received: ");
+  //SPDLOG_DEBUG(crcMessage);
 
   // Extract payload:
   memcpy(payload, &message[2], message[1]);
 
   crcPayload = crc16(payload, message[1]);
 
-  SPDLOG_DEBUG("SRC calc: ");
-  SPDLOG_DEBUG(crcPayload);
+  //SPDLOG_DEBUG("SRC calc: ");
+  //SPDLOG_DEBUG(crcPayload);
 
   if (crcPayload == crcMessage) {
-    SPDLOG_DEBUG("Received: ");
+    /*SPDLOG_DEBUG("Received: ");
     serialPrint(message, lenMes);
     SPDLOG_DEBUG("");
     SPDLOG_DEBUG("Payload :      ");
     serialPrint(payload, message[1] - 1);
+    */
 
     return true;
   } else {
