@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/serial_port.hpp>
 #include "buffer.h"
 #include "crc.h"
 #include "datatypes.h"

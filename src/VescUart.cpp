@@ -2,8 +2,9 @@
 
 #include "VescUart.h"
 #include "spdlog/spdlog.h"
-#include <boost/asio/read.hpp>
-#include <boost/asio/write.hpp>
+#include <fcntl.h>    /* For O_RDWR */
+#include <unistd.h>   /* For open(), creat() */
+#include <termios.h>
 #include <chrono>
 #include <cstring>
 
